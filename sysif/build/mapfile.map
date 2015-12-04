@@ -1,0 +1,331 @@
+
+Allocating common symbols
+Common symbol       size              file
+
+kernel_heap_limit   0x4               build/kheap.o
+stack               0x4               build/syscall.o
+kmain_process       0x50              build/syscall.o
+kernel_heap_top     0x4               build/kheap.o
+current_process     0x4               build/syscall.o
+list_pointer        0x4               build/syscall.o
+uart_error          0x4               build/uart.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+RAM              0x0000000000008000 0x000000001fff8000
+PERIPHERALS      0x0000000020000000 0x0000000000ffffff
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+LOAD build/kheap.o
+LOAD build/syscall.o
+LOAD build/init.o
+LOAD build/uart.o
+LOAD build/pwm.o
+LOAD build/sched.o
+LOAD build/util.o
+LOAD build/hw.o
+LOAD build/asm_tools.o
+LOAD build/kmain.o
+                0x0000000000000200                KERNEL_STACK_SIZE = 0x200
+                0x0000000000000200                SYS_STACK_SIZE = 0x200
+                0x0000000000000200                IRQ_STACK_SIZE = 0x200
+                0x0000000000100000                USER_STACKS_SIZE = 0x100000
+
+.text           0x0000000000008000     0x1758
+ build/init.o(.text*)
+ .text          0x0000000000008000       0xc4 build/init.o
+                0x0000000000008000                _start
+ *(.text*)
+ .text          0x00000000000080c4      0x360 build/kheap.o
+                0x00000000000080c4                aligned_value
+                0x0000000000008110                kAlloc_aligned
+                0x00000000000082c4                kAlloc
+                0x00000000000083b0                kFree
+                0x00000000000083f8                kheap_init
+ .text          0x0000000000008424      0x54c build/syscall.o
+                0x0000000000008424                sys_reboot
+                0x0000000000008444                do_sys_reboot
+                0x0000000000008460                sys_nop
+                0x0000000000008484                do_sys_nop
+                0x000000000000848c                sys_settime
+                0x00000000000084dc                do_sys_settime
+                0x0000000000008550                sys_gettime
+                0x00000000000085d4                do_sys_gettime
+                0x0000000000008638                copyRegistres
+                0x000000000000875c                sys_yieldto
+                0x0000000000008788                do_sys_yieldto
+                0x0000000000008894                sys_yield
+                0x00000000000088b4                do_sys_yield
+                0x00000000000088d8                swi_handler
+ .text          0x0000000000008970      0x670 build/uart.o
+                0x0000000000008970                uart_init
+                0x0000000000008a8c                uart_send_str
+                0x0000000000008b28                uart_send_int
+                0x0000000000008d20                uart_receive_str
+                0x0000000000008e00                uart_receive_int
+                0x0000000000008fac                uart_is_receive_fifo_empty
+ .text          0x0000000000008fe0      0x224 build/pwm.o
+                0x0000000000009178                audio_test
+ .text          0x0000000000009204       0xdc build/sched.o
+                0x0000000000009204                sched_init
+                0x0000000000009234                create_process
+                0x00000000000092c4                elect
+ .text          0x00000000000092e0       0x10 build/util.o
+                0x00000000000092e0                kernel_panic
+ .text          0x00000000000092f0      0x3b4 build/hw.o
+                0x00000000000092f0                divide
+                0x0000000000009358                get_date_ms
+                0x000000000000937c                set_date_ms
+                0x0000000000009418                set_next_tick
+                0x0000000000009470                set_next_tick_default
+                0x00000000000094bc                timer_init
+                0x00000000000094e8                led_on
+                0x0000000000009524                led_off
+                0x0000000000009560                led_switch
+                0x000000000000958c                led_status
+                0x00000000000095a0                led_init
+                0x00000000000095d4                led_blink
+                0x0000000000009674                hw_init
+                0x0000000000009684                terminate_kernel
+ .text          0x00000000000096a4       0x48 build/asm_tools.o
+                0x00000000000096a4                Set32
+                0x00000000000096ac                Get32
+                0x00000000000096b4                delay
+                0x00000000000096c8                memory_barrier
+                0x00000000000096e0                invalidate_cache
+ .text          0x00000000000096ec       0x6c build/kmain.o
+                0x00000000000096ec                user_process
+                0x0000000000009710                kmain
+                0x0000000000009758                __bss_start = .
+
+.glue_7         0x0000000000009758        0x0
+ .glue_7        0x0000000000000000        0x0 linker stubs
+
+.glue_7t        0x0000000000009758        0x0
+ .glue_7t       0x0000000000000000        0x0 linker stubs
+
+.vfp11_veneer   0x0000000000009758        0x0
+ .vfp11_veneer  0x0000000000000000        0x0 linker stubs
+
+.v4_bx          0x0000000000009758        0x0
+ .v4_bx         0x0000000000000000        0x0 linker stubs
+
+.iplt           0x0000000000009758        0x0
+ .iplt          0x0000000000000000        0x0 build/kheap.o
+
+.bss            0x0000000000009758       0x70
+ *(.bss*)
+ .bss           0x0000000000009758        0x4 build/kheap.o
+                0x0000000000009758                freelist
+ .bss           0x000000000000975c        0x0 build/syscall.o
+ .bss           0x000000000000975c        0x0 build/init.o
+ .bss           0x000000000000975c        0x0 build/uart.o
+ .bss           0x000000000000975c        0x0 build/pwm.o
+ .bss           0x000000000000975c        0x0 build/sched.o
+ .bss           0x000000000000975c        0x0 build/util.o
+ .bss           0x000000000000975c        0x4 build/hw.o
+ .bss           0x0000000000009760        0x0 build/asm_tools.o
+ .bss           0x0000000000009760        0x0 build/kmain.o
+ COMMON         0x0000000000009760        0x8 build/kheap.o
+                0x0000000000009760                kernel_heap_limit
+                0x0000000000009764                kernel_heap_top
+ COMMON         0x0000000000009768       0x5c build/syscall.o
+                0x0000000000009768                stack
+                0x000000000000976c                kmain_process
+                0x00000000000097bc                current_process
+                0x00000000000097c0                list_pointer
+ COMMON         0x00000000000097c4        0x4 build/uart.o
+                0x00000000000097c4                uart_error
+                0x00000000000097c8                __bss_end__ = .
+                0x00000000000097c8                __rodata_start__ = .
+
+.rodata         0x00000000000097c8       0x50
+ *(.rodata*)
+ .rodata        0x00000000000097c8       0x10 build/syscall.o
+ .rodata        0x00000000000097d8       0x28 build/uart.o
+ .rodata        0x0000000000009800       0x18 build/hw.o
+                0x0000000000009818                __rodata_end__ = .
+                0x0000000000009818                __data_start__ = .
+
+.rel.dyn        0x0000000000009818        0x0
+ .rel.iplt      0x0000000000000000        0x0 build/kheap.o
+
+.data           0x0000000000009818        0xc
+ *(.data)
+ .data          0x0000000000009818        0x0 build/kheap.o
+ .data          0x0000000000009818        0x0 build/syscall.o
+ .data          0x0000000000009818        0x0 build/init.o
+ .data          0x0000000000009818        0x0 build/uart.o
+ .data          0x0000000000009818        0xc build/pwm.o
+ .data          0x0000000000009824        0x0 build/sched.o
+ .data          0x0000000000009824        0x0 build/util.o
+ .data          0x0000000000009824        0x0 build/hw.o
+ .data          0x0000000000009824        0x0 build/asm_tools.o
+ .data          0x0000000000009824        0x0 build/kmain.o
+                0x0000000000009824                __data_end__ = .
+
+.igot.plt       0x0000000000009824        0x0
+ .igot.plt      0x0000000000000000        0x0 build/kheap.o
+
+.stack          0x0000000000009824      0x600
+                0x0000000000009824                __stack_start__ = .
+                0x0000000000009a24                . = (. + KERNEL_STACK_SIZE)
+ *fill*         0x0000000000009824      0x200 00
+                0x0000000000009a24                . = ALIGN (0x4)
+                0x0000000000009a24                __svc_stack_end__ = .
+                0x0000000000009c24                . = (. + SYS_STACK_SIZE)
+ *fill*         0x0000000000009a24      0x200 00
+                0x0000000000009c24                . = ALIGN (0x4)
+                0x0000000000009c24                __sys_stack_end__ = .
+                0x0000000000009e24                . = (. + IRQ_STACK_SIZE)
+ *fill*         0x0000000000009c24      0x200 00
+                0x0000000000009e24                . = ALIGN (0x4)
+                0x0000000000009e24                __irq_stack_end__ = .
+                0x0000000000009e24                __stacks_end__ = .
+                0x000000000000a000                . = ALIGN (0x1000)
+                0x000000000000a000                __kernel_heap_start__ = .
+                0x0000000000ffffff                . = 0xffffff
+                0x0000000000ffffff                __kernel_heap_end__ = .
+                0x0000000001000000                . = ALIGN (0x1000)
+                0x0000000001000000                __after_kernel_heap__ = .
+                0x0000000020000000                . = 0x20000000
+
+.devices        0x0000000020000000   0xffffff
+                0x0000000020000000                __devices_start__ = .
+                0x0000000020ffffff                . = (. + 0xffffff)
+ *fill*         0x0000000020000000   0xffffff 00
+                0x0000000020ffffff                __devices_end__ = .
+OUTPUT(build/kernel.elf elf32-littlearm)
+
+.debug_info     0x0000000000000000     0x11bd
+ .debug_info    0x0000000000000000      0x2ad build/kheap.o
+ .debug_info    0x00000000000002ad      0x3f6 build/syscall.o
+ .debug_info    0x00000000000006a3       0x4b build/init.o
+ .debug_info    0x00000000000006ee      0x280 build/uart.o
+ .debug_info    0x000000000000096e      0x146 build/pwm.o
+ .debug_info    0x0000000000000ab4      0x1b3 build/sched.o
+ .debug_info    0x0000000000000c67       0x71 build/util.o
+ .debug_info    0x0000000000000cd8      0x2da build/hw.o
+ .debug_info    0x0000000000000fb2       0x50 build/asm_tools.o
+ .debug_info    0x0000000000001002      0x1bb build/kmain.o
+
+.debug_abbrev   0x0000000000000000      0x84a
+ .debug_abbrev  0x0000000000000000      0x12d build/kheap.o
+ .debug_abbrev  0x000000000000012d      0x1a4 build/syscall.o
+ .debug_abbrev  0x00000000000002d1       0x14 build/init.o
+ .debug_abbrev  0x00000000000002e5      0x10a build/uart.o
+ .debug_abbrev  0x00000000000003ef       0xaf build/pwm.o
+ .debug_abbrev  0x000000000000049e       0xfd build/sched.o
+ .debug_abbrev  0x000000000000059b       0x5c build/util.o
+ .debug_abbrev  0x00000000000005f7      0x146 build/hw.o
+ .debug_abbrev  0x000000000000073d       0x14 build/asm_tools.o
+ .debug_abbrev  0x0000000000000751       0xf9 build/kmain.o
+
+.debug_loc      0x0000000000000000      0x604
+ .debug_loc     0x0000000000000000       0xa4 build/kheap.o
+ .debug_loc     0x00000000000000a4      0x158 build/syscall.o
+ .debug_loc     0x00000000000001fc       0xf0 build/uart.o
+ .debug_loc     0x00000000000002ec       0x78 build/pwm.o
+ .debug_loc     0x0000000000000364       0x4c build/sched.o
+ .debug_loc     0x00000000000003b0       0x20 build/util.o
+ .debug_loc     0x00000000000003d0      0x1dc build/hw.o
+ .debug_loc     0x00000000000005ac       0x58 build/kmain.o
+
+.debug_aranges  0x0000000000000000      0x140
+ .debug_aranges
+                0x0000000000000000       0x20 build/kheap.o
+ .debug_aranges
+                0x0000000000000020       0x20 build/syscall.o
+ .debug_aranges
+                0x0000000000000040       0x20 build/init.o
+ .debug_aranges
+                0x0000000000000060       0x20 build/uart.o
+ .debug_aranges
+                0x0000000000000080       0x20 build/pwm.o
+ .debug_aranges
+                0x00000000000000a0       0x20 build/sched.o
+ .debug_aranges
+                0x00000000000000c0       0x20 build/util.o
+ .debug_aranges
+                0x00000000000000e0       0x20 build/hw.o
+ .debug_aranges
+                0x0000000000000100       0x20 build/asm_tools.o
+ .debug_aranges
+                0x0000000000000120       0x20 build/kmain.o
+
+.debug_line     0x0000000000000000      0x71d
+ .debug_line    0x0000000000000000      0x10d build/kheap.o
+ .debug_line    0x000000000000010d      0x11c build/syscall.o
+ .debug_line    0x0000000000000229       0x67 build/init.o
+ .debug_line    0x0000000000000290       0xfb build/uart.o
+ .debug_line    0x000000000000038b       0x7e build/pwm.o
+ .debug_line    0x0000000000000409       0xa6 build/sched.o
+ .debug_line    0x00000000000004af       0x3d build/util.o
+ .debug_line    0x00000000000004ec       0xf9 build/hw.o
+ .debug_line    0x00000000000005e5       0x4e build/asm_tools.o
+ .debug_line    0x0000000000000633       0xea build/kmain.o
+
+.debug_str      0x0000000000000000      0x4ff
+ .debug_str     0x0000000000000000      0x164 build/kheap.o
+                                        0x19f (size before relaxing)
+ .debug_str     0x0000000000000164      0x109 build/syscall.o
+                                        0x205 (size before relaxing)
+ .debug_str     0x000000000000026d       0xc2 build/uart.o
+                                        0x17a (size before relaxing)
+ .debug_str     0x000000000000032f       0x36 build/pwm.o
+                                         0xe7 (size before relaxing)
+ .debug_str     0x0000000000000365       0x32 build/sched.o
+                                        0x153 (size before relaxing)
+ .debug_str     0x0000000000000397       0x26 build/util.o
+                                         0x51 (size before relaxing)
+ .debug_str     0x00000000000003bd      0x102 build/hw.o
+                                        0x1c6 (size before relaxing)
+ .debug_str     0x00000000000004bf       0x40 build/kmain.o
+                                        0x170 (size before relaxing)
+
+.comment        0x0000000000000000       0x11
+ .comment       0x0000000000000000       0x11 build/kheap.o
+                                         0x12 (size before relaxing)
+ .comment       0x0000000000000000       0x12 build/syscall.o
+ .comment       0x0000000000000000       0x12 build/uart.o
+ .comment       0x0000000000000000       0x12 build/pwm.o
+ .comment       0x0000000000000000       0x12 build/sched.o
+ .comment       0x0000000000000000       0x12 build/util.o
+ .comment       0x0000000000000000       0x12 build/hw.o
+ .comment       0x0000000000000000       0x12 build/kmain.o
+
+.ARM.attributes
+                0x0000000000000000       0x3e
+ .ARM.attributes
+                0x0000000000000000       0x40 build/kheap.o
+ .ARM.attributes
+                0x0000000000000040       0x40 build/syscall.o
+ .ARM.attributes
+                0x0000000000000080       0x28 build/init.o
+ .ARM.attributes
+                0x00000000000000a8       0x40 build/uart.o
+ .ARM.attributes
+                0x00000000000000e8       0x40 build/pwm.o
+ .ARM.attributes
+                0x0000000000000128       0x40 build/sched.o
+ .ARM.attributes
+                0x0000000000000168       0x40 build/util.o
+ .ARM.attributes
+                0x00000000000001a8       0x40 build/hw.o
+ .ARM.attributes
+                0x00000000000001e8       0x28 build/asm_tools.o
+ .ARM.attributes
+                0x0000000000000210       0x40 build/kmain.o
+
+.debug_frame    0x0000000000000000      0x4a0
+ .debug_frame   0x0000000000000000       0x84 build/kheap.o
+ .debug_frame   0x0000000000000084      0x128 build/syscall.o
+ .debug_frame   0x00000000000001ac       0xa0 build/uart.o
+ .debug_frame   0x000000000000024c       0x54 build/pwm.o
+ .debug_frame   0x00000000000002a0       0x50 build/sched.o
+ .debug_frame   0x00000000000002f0       0x24 build/util.o
+ .debug_frame   0x0000000000000314      0x14c build/hw.o
+ .debug_frame   0x0000000000000460       0x40 build/kmain.o
