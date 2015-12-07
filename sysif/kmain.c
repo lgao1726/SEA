@@ -1,30 +1,53 @@
-#include "util.h"
 #include "syscall.h"
-#include "sched.h"
-#define NB_PROCESS 5
-void user_process()
+
+struct pcb_s pcb1,pcb2;
+
+struct pcb_s *p1,*p2;
+
+void user_process_1()
 {
-	int v=0;
-	for(;;)
+	int v1=5;
+	while(1)
 	{
-		v++;
-		sys_yield();
+		v1++;
 	}
 }
 
-void kmain( void )
+void user_process_2()
 {
-	sched_init();
-	int i;
-	for(i=0;i<NB_PROCESS;i++)
-	{
-		create_process((func_t*) &user_process);
-	}
-	__asm("cps 0x10"); // switch CPU to USER mode
-	// **********************************************************************
-
+	int v2=-12;
 	while(1)
 	{
-		sys_yield();
+	v2-=2;
 	}
+}
+
+void user_process_3(){
+	int v3 = 0;
+	while(1){
+		v3 += 5;
+	}
+	sys_exit();
+}
+
+
+int  kmain(void)
+{
+	sched_init();
+	
+	//initialise processes
+	create_process((func_t*)&user_process_1);
+	create_process((func_t*)&user_process_2);	
+	create_process((func_t*)&user_process_3);
+
+	timer_init();
+	ENABLE_IRQ();
+
+	__asm("cps 0x10"); //switch CPU to USER mode
+	while(1){
+		sys_yield();
+	}	
+	
+	return 0;
+
 }
