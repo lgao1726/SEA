@@ -80,7 +80,6 @@ void do_sys_gettime(void)
 }
 
 
-
 void copyRegistres(){
 	__asm("mov %0,r0" : "=r"(current_process->registres[0]));
 	__asm("mov %0,r1" : "=r"(current_process->registres[1]));
@@ -110,6 +109,39 @@ void copyRegistres(){
 
 	
 }
+/*dispatcher that schedules processes*/
+void sys_yield(){
+	int num = 6;	
+	__asm("mov r0, %0" : :"r"(num));
+	__asm("SWI #0");
+
+}
+
+void do_sys_yield(){
+	copyRegistres();
+	elect();
+	//restore context
+	__asm("mov r0, %0" : :"r"(current_process->registres[0]));
+	__asm("mov r1, %0" : :"r"(current_process->registres[1]));
+	__asm("mov r2, %0" : :"r"(current_process->registres[2]));
+	__asm("mov r3, %0" : :"r"(current_process->registres[3]));
+	__asm("mov r4, %0" : :"r"(current_process->registres[4]));
+	__asm("mov r5, %0" : :"r"(current_process->registres[5]));
+	__asm("mov r6, %0" : :"r"(current_process->registres[6]));
+	__asm("mov r7, %0" : :"r"(current_process->registres[7]));
+	__asm("mov r8, %0" : :"r"(current_process->registres[8]));
+	__asm("mov r9, %0" : :"r"(current_process->registres[9]));
+	__asm("mov r10, %0" : :"r"(current_process->registres[10]));
+	__asm("mov r11, %0" : :"r"(current_process->registres[11]));
+	__asm("mov r12, %0" : :"r"(current_process->registres[12]));
+	//we can't access the user LR register from SVC
+	//switch temporarily to System mode to load LR
+	__asm("cps 0x1F");
+	__asm("mov lr, %0" : :"r"(current_process->lr_user));
+	__asm("mov sp, %0" : :"r"(current_process->sp));
+	__asm("cps 0x13");
+}
+
 /*passe la main a un autre processus*/
 void sys_yieldto(struct pcb_s* dest){
 	int num = 5;
@@ -119,10 +151,10 @@ void sys_yieldto(struct pcb_s* dest){
 }
 
 void do_sys_yieldto(){
-
-	__asm("mov %0,r1" : "=r"(current_process));
- 	
-
+	struct pcb_s* dest;
+ 	copyRegistres(); 
+	elect();
+	//restore context
 	__asm("mov r0, %0" : :"r"(current_process->registres[0]));
 	__asm("mov r1, %0" : :"r"(current_process->registres[1]));
 	__asm("mov r2, %0" : :"r"(current_process->registres[2]));
@@ -143,26 +175,42 @@ void do_sys_yieldto(){
 	__asm("mov sp, %0" : :"r"(current_process->sp));
 	__asm("cps 0x13");
 
-
-}
-
-void sys_yield(){
-	int num = 6;
-	__asm("mov r0, %0" : : "r"(num));
-	__asm("SWI #0");
-}
-
-void do_sys_yield(){
 	
-	copyRegistres();
-	elect();
-	__asm("mov r1, %0" : :"r"(current_process));
-	do_sys_yieldto();
+
+}
+
+//terminate the process  
+uint32_t sys_exit(){
+	int num = 7;
+	__asm("mov r0, %0" : :"r"(num));
+	__asm("SWI #0");
+	return 0;
+}
+
+void do_sys_exit(){
+	struct pcb_s* to_delete = current_process;
+	to_delete->status = PROCESS_TERMINATED;
+	do_sys_yield();
+	int terminated = 0;
+	if(to_delete==current_process){
+		terminated = 1;
+	}
+
+	to_delete->prev_process->next_process = to_delete->next_process;	 to_delete->next_process->prev_process = to_delete->prev_process;
+
+	kFree((void*)to_delete,10000);
+	kFree((void*)to_delete,sizeof(struct pcb_s));
+	
+	if(terminated==1){
+		terminate_kernel();
+	}	
 	
 }
 
 void __attribute__((naked)) swi_handler(void)
 {
+	
+	
 	__asm("stmfd sp!,{r0-r12,lr}");	
 	int num;
 	__asm("mov %0,r0" : "=r"(num));
@@ -177,15 +225,16 @@ void __attribute__((naked)) swi_handler(void)
 		__asm("mov %0,sp" : "=r"(stack));
 		do_sys_gettime();
 	}else if(num == 5){
+		do_sys_yieldto();	
+	}else if(num ==6){
 		do_sys_yieldto();
-	}else if(num == 6){
-		do_sys_yield();	
+	}else if(num == 7){
+		do_sys_exit();
 	}else{
 		PANIC();
 	}
 	__asm("ldmfd sp!,{r0-r12,pc}^");
 }
-
 
 
 
