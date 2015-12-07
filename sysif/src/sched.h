@@ -27,7 +27,7 @@ uint32_t* lr_irq;
 
 void sched_init();
 void elect();
-struct pcb_s* createProcess(func_t* entry);
+void createProcess(func_t* entry);
 
 
 #endif
