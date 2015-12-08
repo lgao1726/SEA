@@ -27,7 +27,9 @@ uint32_t* lr_irq;
 
 void sched_init();
 void elect();
-void createProcess(func_t* entry);
+void  create_process(func_t* entry);
+void context_load_from_pcb();
+void context_save_to_pcb();
 
 
 #endif
