@@ -32,6 +32,7 @@ void create_process(func_t* entry){
 	}else if(kmain_process.next_process->priority < p->priority){
 		p->next_process = kmain_process.next_process;
 		p->prev_process = kmain_process.next_process->prev_process;
+		kmain_process.next_process->prev_process->next_process = p;
 		kmain_process.next_process->prev_process = p;
 		//change kmain pointers
 		kmain_process.next_process = p;
