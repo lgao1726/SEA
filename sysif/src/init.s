@@ -71,10 +71,10 @@ swi_asm_handler:
 	b swi_handler
 	
 prefetch_asm_handler:
-	b irq_handler
+	b irq_asm_handler
 
 irq_asm_handler:
-	b irq_asm_handler
+	b irq_handler
 
 unused_asm_handler:
 	b unused_asm_handler
