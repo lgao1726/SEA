@@ -1,70 +1,114 @@
 #include "sched.h"
 #include "syscall.h"
 /*pointe le pcb current_process vers kmain*/
-uint32_t* stack;
-
 void sched_init(){
 	current_process = &kmain_process;
 	list_pointer = &kmain_process;
 	kheap_init();
 }
 
+int random_seed=0;
+uint32_t maxrand(int seed,int max)
+{
+	//random_seed = random_seed+seed * 1103515245 +12345;
+	//return (uint32_t)(random_seed / 65536) % (max+1); 
+	return random_seed++;
+}
+
 void create_process(func_t* entry){
 	struct pcb_s* p =(struct pcb_s*)  kAlloc(sizeof(struct pcb_s));
 	
 	p->lr_user = entry;
-	p->lr_svc = p->lr_user;
 	p->status = PROCESS_RUNNING;
 	//initialize a stackof size 10KB
 	p->stack = (uint32_t*) kAlloc(10000);
 	p->sp = (p->stack+10000);
-
-	list_pointer->next_process = p;
+	p->priority = maxrand(3,10);
 	if(list_pointer==&kmain_process){
+		list_pointer->next_process = p;
 		list_pointer->prev_process = p;
+		p->next_process = p;
+		p->prev_process = p;
+	}else if(kmain_process.next_process->priority < p->priority){
+		p->next_process = kmain_process.next_process;
+		p->prev_process = kmain_process.next_process->prev_process;
+		kmain_process.next_process->prev_process->next_process = p;
+		kmain_process.next_process->prev_process = p;
+		//change kmain pointers
+		kmain_process.next_process = p;
+		kmain_process.prev_process = p;
+	}else{	
+		struct pcb_s * cur = kmain_process.next_process;
+		while(cur->next_process->priority > p->priority) {
+			if(cur->next_process == kmain_process.next_process){
+				break;
+			}
+			cur = cur->next_process;
+		} 
+		p->next_process = cur->next_process;
+		p->prev_process = cur;
+		cur->next_process->prev_process = p;
+		cur->next_process = p;
 	}
-	p->next_process = kmain_process.next_process;
-	p->prev_process = list_pointer->prev_process;
-    kmain_process.next_process->prev_process = p;	
+		
 	list_pointer = p;		
 }
+
 //how to choose the next process
 void elect(){
-	current_process = current_process->next_process;	
+	current_process = current_process->next_process;	 
 		
 }
 
 void context_save_to_pcb(){
-	int i;
-	for(i=0;i<14;i++){
-		current_process->registres[i] = stack[i];
-	}
+	__asm("mov %0,r0" : "=r"(current_process->registres[0]));
+	__asm("mov %0,r1" : "=r"(current_process->registres[1]));
+	__asm("mov %0,r2" : "=r"(current_process->registres[2]));
+	__asm("mov %0,r3" : "=r"(current_process->registres[3]));
+	__asm("mov %0,r4" : "=r"(current_process->registres[4]));
+	__asm("mov %0,r5" : "=r"(current_process->registres[5]));
+	__asm("mov %0,r6" : "=r"(current_process->registres[6]));
+	__asm("mov %0,r7" : "=r"(current_process->registres[7]));
+	__asm("mov %0,r8" : "=r"(current_process->registres[8]));
+	__asm("mov %0,r9" : "=r"(current_process->registres[9]));
+	__asm("mov %0,r10" : "=r"(current_process->registres[10]));
+	__asm("mov %0,r11" : "=r"(current_process->registres[11]));
+	__asm("mov %0,r12" : "=r"(current_process->registres[12]));	
+	
+	__asm("mov %0,lr" : "=r"(current_process->lr_svc));
 	//save cpsr_user by copying spsr_svc
 	__asm("mrs r0,spsr");
 	__asm("mov %0,r0" : "=r"(current_process->cpsr));
 	//switch temporarily to System mode to load sp
-	//and also save lr
 	__asm("cps 0x1F");
 	__asm("mov %0,sp" :"=r"(current_process->sp));
-	__asm("mov %0,lr" :"=r"(current_process->lr_user));
-	__asm("cps 0x13");
-	//save lr_irq (called lr_svc)
-	current_process->lr_svc = (func_t*)current_process->registres[13];
+	__asm("cps 0x12");
+	current_process->lr_user = (func_t*) lr_irq;
+
 }
 
 void context_load_from_pcb(){
+	//copyRegistres();
+	//elect();
 	//restore context
-	int i;
-	for(i=0;i<14;i++){
-		stack[i] = current_process->registres[i];
-	}
-	stack[13] = (uint32_t)current_process->lr_svc; 
+	__asm("mov r0, %0" : :"r"(current_process->registres[0]));
+	__asm("mov r1, %0" : :"r"(current_process->registres[1]));
+	__asm("mov r2, %0" : :"r"(current_process->registres[2]));
+	__asm("mov r3, %0" : :"r"(current_process->registres[3]));
+	__asm("mov r4, %0" : :"r"(current_process->registres[4]));
+	__asm("mov r5, %0" : :"r"(current_process->registres[5]));
+	__asm("mov r6, %0" : :"r"(current_process->registres[6]));
+	__asm("mov r7, %0" : :"r"(current_process->registres[7]));
+	__asm("mov r8, %0" : :"r"(current_process->registres[8]));
+	__asm("mov r9, %0" : :"r"(current_process->registres[9]));
+	__asm("mov r10, %0" : :"r"(current_process->registres[10]));
+	__asm("mov r11, %0" : :"r"(current_process->registres[11]));
+	__asm("mov r12, %0" : :"r"(current_process->registres[12]));
 	//we can't access the user sp register from IRQ
 	//switch temporarily to System mode to load sp
 	__asm("cps 0x1F");
 	__asm("mov sp, %0" : :"r"(current_process->sp));
-	__asm("mov lr,%0": :"r"(current_process->lr_user));
-	__asm("cps 0x13");
+	__asm("cps 0x12");
 
 }
 
@@ -77,16 +121,19 @@ void yieldto_irq(){
 //IRQ handler
  void __attribute__((naked)) irq_handler(){
 	__asm("SUB lr,lr,#4");//subtract 4 otherwise we "skip" an instruction
-	__asm("stmfd sp!,{r0-r12,lr}");
-	__asm("mov %0,sp" : "=r"(stack));
-	__asm("cps 0x13"); //enter svc mode
-	do_sys_yieldto(); 
-	__asm("cps 0x12"); //return to irq mode
+	__asm("mov %0,lr" : "=r"(lr_irq));
+	__asm("stmfd sp!,{r0-r12}");
+
+	context_save_to_pcb();
+	elect();
+	context_load_from_pcb();
+	lr_irq =(uint32_t*) current_process->lr_user;
 	//rearm timer
 	set_next_tick_default();
 	ENABLE_TIMER_IRQ();
 	ENABLE_IRQ();
-	__asm("ldmfd sp!,{r0-r12,pc}^");
+	__asm("ldmfd sp!,{r0-r12}^");
 	__asm("cps 0x10");
 	__asm("mov pc, %0" : :"r"(lr_irq));
 }
+

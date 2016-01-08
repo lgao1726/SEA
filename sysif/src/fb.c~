@@ -237,10 +237,9 @@ void drawRed(uint32 x1, uint32 x2, uint32 y1, uint32 y2) {
   for (x = x1; x < x2; x++) {
     for (y = y1; y < y2; y++) {
       put_pixel_RGB24(x,y,255,0,0);
-       	z=0;
-		while(z<10) {
-			z++;
-		}
+        		while(z<10) {
+        			z++;
+        		}
     }
   }
 }
@@ -254,10 +253,9 @@ void drawBlue(uint32 x1, uint32 x2, uint32 y1, uint32 y2) {
     for (y = y1; y < y2; y++) {
     
       put_pixel_RGB24(x,y,0,0,255);
-       	z=0;
-		while(z<10) {
-			z++;
-		}
+        		while(z<10) {
+        			z++;
+        		}
     }
   }
 }
@@ -281,10 +279,9 @@ void drawWhite(uint32 x1, uint32 x2, uint32 y1, uint32 y2){
   for (x = x1; x < x2; x++) {
     for (y = y1; y < y2; y++) {
       put_pixel_RGB24(x,y,255,255,255);
-       	z=0;
-		while(z<10) {
-			z++;
-		}
+        		while(z<10) {
+        			z++;
+        		}
     }
   }
 }
@@ -295,10 +292,9 @@ void drawGreen(uint32 x1, uint32 x2, uint32 y1, uint32 y2){
   for (x = x1; x < x2; x++) {
     for (y = y1; y < y2; y++) {
       put_pixel_RGB24(x,y,0,255,0);
-       	z=0;
-		while(z<10) {
-			z++;
-		}
+        		while(z<10) {
+        			z++;
+        		}
     }
   }
 }
@@ -309,10 +305,9 @@ void drawBlack(uint32 x1, uint32 x2, uint32 y1, uint32 y2){
   for (x = x1; x < x2; x++) {
     for (y = y1; y < y2; y++) {
       put_pixel_RGB24(x,y,0,0,0);
-       	z=0;
-		while(z<10) {
-			z++;
-		}
+        		while(z<10) {
+        			z++;
+        		}
     }
   }
 }

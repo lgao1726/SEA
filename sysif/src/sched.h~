@@ -18,7 +18,6 @@ struct pcb_s{
 	struct pcb_s* prev_process;
 	uint32_t status;
 	uint32_t code;
-	uint32_t priority;
 };
 
 struct pcb_s *current_process;
@@ -26,12 +25,11 @@ struct pcb_s kmain_process;
 struct pcb_s *list_pointer;
 uint32_t* lr_irq;
 
-
-uint32_t maxrand(int seed,int max);
-
 void sched_init();
 void elect();
-void createProcess(func_t* entry);
+void  create_process(func_t* entry);
+void context_load_from_pcb();
+void context_save_to_pcb();
+
 
 #endif
-

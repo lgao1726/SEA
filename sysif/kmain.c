@@ -30,6 +30,34 @@ void user_process_3(){
 	sys_exit();
 }
 
+void user_process_Red_ul(){
+	drawRed(0, fb_x/2, 0, fb_y/2);
+	sys_exit();
+}
+
+void user_process_Blue_ur(){
+	drawBlue(fb_x/2, fb_x, 0, fb_y/2);
+	sys_exit();
+}
+
+
+void user_process_Black_ll(){
+	drawBlack(0, fb_x/2, fb_y/2, fb_y);
+	sys_exit();
+}
+
+
+void user_process_White_ll(){
+	drawWhite(0, fb_x/2, fb_y/2, fb_y);
+	sys_exit();
+}
+
+
+void user_process_Green_lr(){
+	drawGreen(fb_x/2, fb_x, fb_y/2, fb_y);
+	sys_exit();
+}
+
 
 int  kmain(void)
 {
@@ -47,8 +75,26 @@ int  kmain(void)
 	while(1){
 		sys_yield();
 	}	*/
-	UsbInitialise();
+			
+	//UsbInitialise();
 	FramebufferInitialize();
+	
+	sched_init();
+	
+	//initialise processes
+	create_process((func_t*)&user_process_Red_ul);
+	create_process((func_t*)&user_process_Blue_ur);	
+	create_process((func_t*)&user_process_White_ll);
+	create_process((func_t*)&user_process_Green_lr);
+
+	timer_init();
+	ENABLE_IRQ();
+
+	__asm("cps 0x10"); //switch CPU to USER mode
+	while(1){
+		sys_yield();
+	}
+	/*
 	
 	char c;
 	while(1){	
@@ -56,13 +102,27 @@ int  kmain(void)
 		c = KeyboardGetChar();
 		
 		switch(c){
-			case 'a' :
-				drawRed();
-				break;
 			case 's' :
-				drawBlue();
+				sched_init();
+	
+				//initialise processes
+				create_process((func_t*)&user_process_Red_ul);
+				create_process((func_t*)&user_process_Blue_ur);	
+				create_process((func_t*)&user_process_White_ll);
+				create_process((func_t*)&user_process_Green_lr);
+
+				timer_init();
+				ENABLE_IRQ();
+
+				__asm("cps 0x10"); //switch CPU to USER mode
+				while(1){
+					sys_yield();
+				}
 				break;
-			case 'd' :
+			case 'b' :
+				drawBlue(0, fb_x, 0, fb_y);
+				break;
+			/*case 'd' :
 				drawGreen();
 				break;
 			case 'f' :
@@ -70,12 +130,13 @@ int  kmain(void)
 				break;
 			case 'g' :
 				drawTest();
-				break;
-				
+				break;*/
+				/*
 			default :
 				;
 		}
-	}
+	}*/
+		
 	return 0;
 
 }
