@@ -76,7 +76,9 @@ int  kmain(void)
 		sys_yield();
 	}	*/
 			
-	UsbInitialise();
+	timer_init();
+	ENABLE_IRQ();
+	//UsbInitialise();
 	FramebufferInitialize();
 	
 	sched_init();

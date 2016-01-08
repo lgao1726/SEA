@@ -7,7 +7,7 @@ void sched_init(){
 	kheap_init();
 }
 
-int random_seed=0;
+int random_seed=1;
 uint32_t maxrand(int seed,int max)
 {
 	//random_seed = random_seed+seed * 1103515245 +12345;
@@ -25,10 +25,13 @@ void create_process(func_t* entry){
 	p->sp = (p->stack+10000);
 	p->priority = maxrand(3,10);
 	if(list_pointer==&kmain_process){
-		list_pointer->next_process = p;
-		list_pointer->prev_process = p;
+		//list_pointer->next_process = p;
+		//list_pointer->prev_process = p;
 		p->next_process = p;
 		p->prev_process = p;
+		//change kmain pointers
+		kmain_process.next_process = p;
+		kmain_process.prev_process = p;
 	}else if(kmain_process.next_process->priority < p->priority){
 		p->next_process = kmain_process.next_process;
 		p->prev_process = kmain_process.next_process->prev_process;
